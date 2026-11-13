@@ -38,8 +38,11 @@ export class SpotifyApiError extends Error {
   }
 }
 
+/** Public Spotify Client ID (safe in the browser with PKCE). VITE_SPOTIFY_CLIENT_ID overrides it. */
+const DEFAULT_SPOTIFY_CLIENT_ID = "8c472be056d24efc996b38bf0a5ac6c9";
+
 export function getSpotifyClientId(): string | undefined {
-  const id = import.meta.env["VITE_SPOTIFY_CLIENT_ID"] as string | undefined;
+  const id = (import.meta.env["VITE_SPOTIFY_CLIENT_ID"] as string | undefined) ?? DEFAULT_SPOTIFY_CLIENT_ID;
   return id && id.trim() ? id.trim() : undefined;
 }
 
