@@ -94,7 +94,7 @@ export function TrackRow({ track, index, queue, showBadge = true, showAlbum = tr
               href={track.externalUrl}
               target="_blank"
               rel="noreferrer"
-              aria-label={`Open ${track.title} on ${track.source === "youtube" ? "YouTube" : "Spotify"}`}
+              aria-label={`Open ${track.title} on ${track.source === "youtube" ? "YouTube" : track.source === "audius" ? "Audius" : "Spotify"}`}
             >
               <ExternalLink />
             </a>

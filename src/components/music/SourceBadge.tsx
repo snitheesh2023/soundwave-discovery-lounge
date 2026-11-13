@@ -2,8 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import type { Source } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const LABEL: Record<Source, string> = { demo: "Sample", spotify: "Spotify", youtube: "YouTube" };
-const VARIANT = { demo: "sample", spotify: "spotify", youtube: "youtube" } as const;
+const LABEL: Record<Source, string> = { demo: "Sample", spotify: "Spotify", youtube: "YouTube", audius: "Audius" };
+const VARIANT = { demo: "sample", spotify: "spotify", youtube: "youtube", audius: "spotify" } as const;
 
 export function SourceBadge({ source, className }: { source: Source; className?: string }) {
   return (

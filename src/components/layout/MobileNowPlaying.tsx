@@ -50,7 +50,7 @@ export function MobileNowPlaying() {
           {current.externalUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={current.externalUrl} target="_blank" rel="noreferrer">
-                <ExternalLink /> {current.source === "youtube" ? "YouTube" : "Spotify"}
+                <ExternalLink /> {current.source === "youtube" ? "YouTube" : current.source === "audius" ? "Audius" : "Spotify"}
               </a>
             </Button>
           )}

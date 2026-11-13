@@ -15,6 +15,7 @@ import { DemoEngine } from "./engines/demo-engine";
 import { SpotifyEmbedEngine } from "./engines/spotify-embed-engine";
 import type { EngineCallbacks, PlaybackEngine } from "./engines/types";
 import { YouTubeEngine } from "./engines/youtube-engine";
+import { AudiusEngine } from "./engines/audius-engine";
 import {
   cycleRepeat,
   indexAfterEnded,
@@ -91,6 +92,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   });
   const engines = useRef<Partial<Record<Source, PlaybackEngine>>>({});
   const activeSource = useRef<Source | null>(null);
+  const mediaActions = useRef<Pick<PlayerApi, "togglePlay" | "next" | "previous" | "seek"> | null>(null);
 
   const patch = useCallback((p: Partial<PlayerState>) => setState((s) => ({ ...s, ...p })), []);
 
@@ -131,6 +133,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         engine = new YouTubeEngine(hosts.current.youtube, makeCallbacks("youtube"));
       if (source === "spotify" && hosts.current.spotify)
         engine = new SpotifyEmbedEngine(hosts.current.spotify, makeCallbacks("spotify"));
+      if (source === "audius") engine = new AudiusEngine(makeCallbacks("audius"));
       if (engine) engines.current[source] = engine;
       return engine;
     },
@@ -164,6 +167,36 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!current) return;
     engines.current[current.source]?.setVolume(state.volume, state.muted);
   }, [state.volume, state.muted, current]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    const session = navigator.mediaSession;
+    if (current?.source === "audius") {
+      session.metadata = new MediaMetadata({
+        title: current.title,
+        artist: current.artist,
+        album: current.album ?? "Soundwave",
+        artwork: current.artworkUrl ? [{ src: current.artworkUrl, sizes: "512x512" }] : [],
+      });
+      session.playbackState = state.isPlaying ? "playing" : "paused";
+      const actions: [MediaSessionAction, MediaSessionActionHandler][] = [
+        ["play", () => mediaActions.current?.togglePlay()],
+        ["pause", () => mediaActions.current?.togglePlay()],
+        ["previoustrack", () => mediaActions.current?.previous()],
+        ["nexttrack", () => mediaActions.current?.next()],
+        ["seekto", (details) => { if (details.seekTime !== undefined) mediaActions.current?.seek(details.seekTime); }],
+      ];
+      for (const [action, handler] of actions) {
+        try { session.setActionHandler(action, handler); } catch { /* unsupported action */ }
+      }
+    } else {
+      session.metadata = null;
+      session.playbackState = "none";
+      for (const action of ["play", "pause", "previoustrack", "nexttrack", "seekto"] as MediaSessionAction[]) {
+        try { session.setActionHandler(action, null); } catch { /* unsupported action */ }
+      }
+    }
+  }, [current, state.isPlaying]);
 
   useEffect(() => {
     const all = engines.current;
@@ -261,6 +294,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, current, playTrack, playIndex, patch]);
+  mediaActions.current = api;
 
   return <PlayerContext.Provider value={api}>{children}</PlayerContext.Provider>;
 }

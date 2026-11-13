@@ -64,7 +64,7 @@ function LibraryPage() {
       <h1 className="text-3xl font-extrabold md:text-4xl">Your Library</h1>
       <Section title="Import from Spotify" eyebrow={<SourceBadge source="spotify" />}>
         <ImportSpotifyPlaylist onImported={addImported} />
-        <p className="px-1 text-xs text-muted-foreground">After importing, open a playlist and choose “Find YouTube matches” to play its tracks from YouTube.</p>
+        <p className="px-1 text-xs text-muted-foreground">After importing, open a playlist and choose “Match for screen-off playback” to find Audius streams, or match tracks to YouTube.</p>
       </Section>
       {imported.length > 0 && <Section title="Imported playlists" eyebrow={<SourceBadge source="spotify" />}>
         <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">

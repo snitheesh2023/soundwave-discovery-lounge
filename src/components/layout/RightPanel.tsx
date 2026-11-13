@@ -27,7 +27,7 @@ export function RightPanel({ className }: { className?: string }) {
           {current?.externalUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={current.externalUrl} target="_blank" rel="noreferrer">
-                <ExternalLink /> Open on {current.source === "youtube" ? "YouTube" : "Spotify"}
+                <ExternalLink /> Open on {current.source === "youtube" ? "YouTube" : current.source === "audius" ? "Audius" : "Spotify"}
               </a>
             </Button>
           )}

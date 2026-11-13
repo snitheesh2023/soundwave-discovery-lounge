@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ExternalLink, Play, Youtube } from "lucide-react";
+import { ExternalLink, Music2, Play, Youtube } from "lucide-react";
 
 import { Artwork } from "@/components/music/Artwork";
 import { SampleNotice } from "@/components/music/SampleNotice";
@@ -15,6 +15,7 @@ import { useYouTubeStatus } from "@/hooks/use-youtube";
 import { findDemoCollection, tracksFor } from "@/lib/demo-data";
 import { spotifyApi } from "@/lib/spotify";
 import { getImportedPlaylists, saveImportedPlaylists, type ImportedPlaylist } from "@/lib/imported-playlists";
+import { searchAudius } from "@/lib/audius";
 import { searchYouTube } from "@/lib/youtube.functions";
 import { youTubeWatchUrl } from "@/lib/youtube-url";
 import type { Collection, Track } from "@/lib/types";
@@ -65,6 +66,7 @@ function PlaylistPage() {
   const { status } = useSpotify();
   const [imported, setImported] = useState<ImportedPlaylist | undefined>(() => getImportedPlaylists().find((p) => p.id === id));
   const [matching, setMatching] = useState(false);
+  const [matchingAudius, setMatchingAudius] = useState(false);
   const [matchError, setMatchError] = useState<string | null>(null);
   const youtubeStatus = useYouTubeStatus();
   useEffect(() => { setImported(getImportedPlaylists().find((p) => p.id === id)); }, [id]);
@@ -74,6 +76,7 @@ function PlaylistPage() {
 
   if (imported) {
     const matched = imported.tracks.filter((t) => t.source === "youtube" && t.youtubeId);
+    const audiusMatched = imported.tracks.filter((t) => t.source === "audius" && t.audiusId);
     const findMatches = async () => {
       setMatching(true); setMatchError(null);
       try {
@@ -94,14 +97,34 @@ function PlaylistPage() {
       } catch (e) { setMatchError(e instanceof Error ? e.message : "YouTube matching failed."); }
       finally { setMatching(false); }
     };
+    const findAudiusMatches = async () => {
+      setMatchingAudius(true); setMatchError(null);
+      try {
+        const out: Track[] = [];
+        for (let start = 0; start < imported.tracks.length; start += 4) {
+          const batch = imported.tracks.slice(start, start + 4);
+          const found = await Promise.all(batch.map(async (track) => {
+            const results = await searchAudius(`${track.title} ${track.artist}`);
+            const match = results[0];
+            return match ? { ...match, title: track.title, artist: track.artist, album: track.album } : null;
+          }));
+          out.push(...found.filter((track): track is Track => Boolean(track)));
+        }
+        const updated = { ...imported, tracks: out, trackCount: out.length, description: "Imported from Spotify and matched to Audius streams for screen-off playback." };
+        saveImportedPlaylists(getImportedPlaylists().map((p) => p.id === id ? updated : p)); setImported(updated);
+        if (!out.length) setMatchError("No Audius matches found. Try a different playlist or match again later.");
+      } catch (e) { setMatchError(e instanceof Error ? e.message : "Audius matching failed."); }
+      finally { setMatchingAudius(false); }
+    };
     return <div className="flex flex-col gap-6 pt-2"><Header collection={imported} tracks={imported.tracks} />
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-4">
-        <div className="flex-1 text-sm text-muted-foreground">{matched.length ? `${matched.length} tracks matched to YouTube.` : "Find playable YouTube videos for this Spotify playlist."}{matchError && <p role="alert" className="mt-1 text-destructive">{matchError}</p>}</div>
+        <div className="flex-1 text-sm text-muted-foreground">{audiusMatched.length ? `${audiusMatched.length} tracks matched to Audius for screen-off playback.` : matched.length ? `${matched.length} tracks matched to YouTube.` : "Choose a playback source for this Spotify playlist."}{matchError && <p role="alert" className="mt-1 text-destructive">{matchError}</p>}</div>
+        <Button variant="signal" onClick={findAudiusMatches} disabled={matchingAudius}><Music2 />{matchingAudius ? "Matching Audius…" : audiusMatched.length ? "Refresh Audius matches" : "Match for screen-off playback"}</Button>
         <Button onClick={findMatches} disabled={matching || youtubeStatus.data?.configured !== true}><Youtube />{matching ? "Finding matches…" : matched.length ? "Refresh YouTube matches" : "Find YouTube matches"}</Button>
         {youtubeStatus.data?.configured === false && <p className="w-full text-xs text-muted-foreground">YouTube search needs an API key. Add it in Connections.</p>}
       </div>
       {imported.tracks.length ? <TrackList tracks={imported.tracks} showBadge /> : <EmptyState title="No tracks found in this import" />}
-      <p className="text-xs text-muted-foreground">Video matches may differ from the original recording. Playback uses YouTube’s official player and may include ads.</p>
+      <p className="text-xs text-muted-foreground">Audius is an independent music catalog, so some Spotify tracks may not have a match. Audius audio streams support screen-off playback in compatible mobile browsers.</p>
     </div>;
   }
 

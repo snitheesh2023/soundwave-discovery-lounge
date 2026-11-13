@@ -1,4 +1,4 @@
-export type Source = "demo" | "spotify" | "youtube";
+export type Source = "demo" | "spotify" | "youtube" | "audius";
 
 export interface Track {
   /** Unique across providers, e.g. "demo:aurora", "spotify:<id>", "youtube:<videoId>" */
@@ -14,6 +14,7 @@ export interface Track {
   source: Source;
   spotifyUri?: string | undefined;
   youtubeId?: string | undefined;
+  audiusId?: string | undefined;
   externalUrl?: string | undefined;
   explicit?: boolean | undefined;
 }

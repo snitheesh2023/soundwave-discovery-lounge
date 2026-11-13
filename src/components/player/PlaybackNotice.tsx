@@ -10,6 +10,7 @@ const NOTES: Record<Track["source"], string> = {
     "Played in YouTube's official player. YouTube may show ads and some videos can't be played outside YouTube.",
   spotify:
     "Played in Spotify's official player. Log in inside the player for full tracks; otherwise Spotify may play a preview.",
+  audius: "Playing an Audius audio stream. On supported phones, playback and lock-screen controls continue while the screen is off.",
 };
 
 export function PlaybackNotice({ className }: { className?: string }) {
@@ -23,7 +24,7 @@ export function PlaybackNotice({ className }: { className?: string }) {
           <p>{error}</p>
           {current.externalUrl && (
             <a href={current.externalUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-cyan hover:underline">
-              Open on {current.source === "youtube" ? "YouTube" : "Spotify"} <ExternalLink className="size-3" />
+              Open on {current.source === "youtube" ? "YouTube" : current.source === "audius" ? "Audius" : "Spotify"} <ExternalLink className="size-3" />
             </a>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { KeyRound, Link2, Loader2, PlugZap, Play, Search as SearchIcon, X, Youtube } from "lucide-react";
+import { KeyRound, Link2, Loader2, Music2, PlugZap, Play, Search as SearchIcon, X, Youtube } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { CollectionCard } from "@/components/music/CollectionCard";
@@ -15,23 +15,25 @@ import { useDebounced } from "@/hooks/use-debounced";
 import { useSpotify } from "@/hooks/use-spotify";
 import { useYouTubeSearch, useYouTubeStatus } from "@/hooks/use-youtube";
 import { generatedArtStyle } from "@/lib/art";
+import { searchAudius } from "@/lib/audius";
 import { BROWSE_GENRES, DEMO_PLAYLISTS, searchDemoTracks, YOUTUBE_EXAMPLE_URL } from "@/lib/demo-data";
 import { spotifyApi } from "@/lib/spotify";
 import type { Track } from "@/lib/types";
 import { parseYouTubeId, youTubeWatchUrl } from "@/lib/youtube-url";
 import { usePlayer } from "@/player/player-context";
 
-type Tab = "all" | "spotify" | "youtube";
+type Tab = "all" | "spotify" | "youtube" | "audius";
 const TABS: { id: Tab; label: string }[] = [
   { id: "all", label: "All" },
   { id: "spotify", label: "Spotify" },
   { id: "youtube", label: "YouTube" },
+  { id: "audius", label: "Audius" },
 ];
 
 export const Route = createFileRoute("/search")({
   validateSearch: (search: Record<string, unknown>): { q?: string | undefined; tab?: Tab | undefined } => ({
     q: typeof search["q"] === "string" && search["q"] ? search["q"].slice(0, 200) : undefined,
-    tab: search["tab"] === "spotify" || search["tab"] === "youtube" ? search["tab"] : undefined,
+    tab: search["tab"] === "spotify" || search["tab"] === "youtube" || search["tab"] === "audius" ? search["tab"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -135,9 +137,30 @@ function SearchPage() {
         <div className="flex flex-col gap-10">
           {(tab === "all" || tab === "spotify") && <SpotifyResults query={query} limit={tab === "all" ? 6 : undefined} />}
           {(tab === "all" || tab === "youtube") && <YouTubeResults query={query} limit={tab === "all" ? 6 : undefined} />}
+          {(tab === "all" || tab === "audius") && <AudiusResults query={query} limit={tab === "all" ? 6 : undefined} />}
         </div>
       )}
     </div>
+  );
+}
+
+function AudiusResults({ query, limit }: { query: string; limit?: number | undefined }) {
+  const results = useQuery({
+    queryKey: ["audius", "search", query],
+    queryFn: () => searchAudius(query),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const items = results.data ?? [];
+  return (
+    <Section title="Audius tracks · screen-off playback" eyebrow={<SourceBadge source="audius" />}>
+      {results.isLoading ? <ListSkeleton /> : results.isError ? (
+        <EmptyState title="Audius search failed">{(results.error as Error).message}</EmptyState>
+      ) : items.length === 0 ? (
+        <EmptyState icon={<Music2 />} title={`No Audius tracks for “${query}”`}>Try another search. Audius is an independent-artist catalog.</EmptyState>
+      ) : <TrackList tracks={limit ? items.slice(0, limit) : items} />}
+      <p className="px-1 text-xs text-muted-foreground">Audius streams play as audio and can continue with your screen locked. Catalog availability depends on each artist's API settings.</p>
+    </Section>
   );
 }
 
