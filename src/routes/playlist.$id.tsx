@@ -81,13 +81,8 @@ function PlaylistPage() {
         for (let start = 0; start < imported.tracks.length; start += 4) {
           const batch = imported.tracks.slice(start, start + 4);
           const found = await Promise.all(batch.map(async (track) => {
-            const result = await searchYouTube({ data: { q: `${track.title} ${track.artist} official lyrics` } });
-            const score = (title: string) => {
-              const value = title.toLowerCase();
-              return (value.includes("lyric") ? 5 : 0) + (value.includes("official") ? 3 : 0)
-                - (["cover", "karaoke", "reaction", "instrumental"].some((word) => value.includes(word)) ? 6 : 0);
-            };
-            const video = [...result.items].sort((a, b) => score(b.title) - score(a.title))[0];
+            const result = await searchYouTube({ data: { q: `${track.title} ${track.artist} official audio` } });
+            const video = result.items[0];
             if (!video?.youtubeId) return null;
             return { ...video, title: track.title, artist: track.artist, album: track.album, source: "youtube" as const, externalUrl: youTubeWatchUrl(video.youtubeId) };
           }));
@@ -101,12 +96,12 @@ function PlaylistPage() {
     };
     return <div className="flex flex-col gap-6 pt-2"><Header collection={imported} tracks={imported.tracks} />
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-4">
-        <div className="flex-1 text-sm text-muted-foreground">{matched.length ? `${matched.length} tracks matched to YouTube.` : "Find official lyric videos for this Spotify playlist."}{matchError && <p role="alert" className="mt-1 text-destructive">{matchError}</p>}</div>
-        <Button onClick={findMatches} disabled={matching || youtubeStatus.data?.configured !== true}><Youtube />{matching ? "Finding matches…" : matched.length ? "Refresh lyric video matches" : "Find official lyric videos"}</Button>
+        <div className="flex-1 text-sm text-muted-foreground">{matched.length ? `${matched.length} tracks matched to YouTube.` : "Find playable YouTube videos for this Spotify playlist."}{matchError && <p role="alert" className="mt-1 text-destructive">{matchError}</p>}</div>
+        <Button onClick={findMatches} disabled={matching || youtubeStatus.data?.configured !== true}><Youtube />{matching ? "Finding matches…" : matched.length ? "Refresh YouTube matches" : "Find YouTube matches"}</Button>
         {youtubeStatus.data?.configured === false && <p className="w-full text-xs text-muted-foreground">YouTube search needs an API key. Add it in Connections.</p>}
       </div>
       {imported.tracks.length ? <TrackList tracks={imported.tracks} showBadge /> : <EmptyState title="No tracks found in this import" />}
-      <p className="text-xs text-muted-foreground">Lyric video matches may differ from the original recording. Playback uses YouTube’s official player and may include ads.</p>
+      <p className="text-xs text-muted-foreground">Video matches may differ from the original recording. Playback uses YouTube’s official player and may include ads.</p>
     </div>;
   }
 
