@@ -35,3 +35,4 @@ use the editor.
 - YouTube Data API calls run in server functions (`src/lib/youtube.functions.ts`) so the API key stays server-side; playback only through the official IFrame player.
 - Playback goes through engine adapters in `src/player/engines/*` behind one player context; pure queue rules live in `src/player/queue-logic.ts` and are unit-tested.
 - Made-up content must carry the "Sample" source badge so it is never mistaken for real provider data.
+- tsconfig is strict (exactOptionalPropertyTypes, noPropertyAccessFromIndexSignature): declare optional props as `T | undefined` and use bracket access for env vars and index signatures, or the preview build fails.
