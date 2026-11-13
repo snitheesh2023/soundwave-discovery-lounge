@@ -36,3 +36,4 @@ use the editor.
 - Playback goes through engine adapters in `src/player/engines/*` behind one player context; pure queue rules live in `src/player/queue-logic.ts` and are unit-tested.
 - Made-up content must carry the "Sample" source badge so it is never mistaken for real provider data.
 - tsconfig is strict (exactOptionalPropertyTypes, noPropertyAccessFromIndexSignature): declare optional props as `T | undefined` and use bracket access for env vars and index signatures, or the preview build fails.
+- Create React contexts with `createStableContext` (`src/lib/stable-context.ts`) and keep provider files exporting only components/hooks; otherwise hot reloads re-create the context and crash the app with "must be used inside <Provider>".

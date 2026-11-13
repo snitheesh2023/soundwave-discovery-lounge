@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+
+import { createStableContext } from "@/lib/stable-context";
 
 import {
   beginSpotifyLogin,
@@ -30,7 +32,7 @@ interface SpotifyContextValue {
   markConnected: () => void;
 }
 
-const SpotifyContext = createContext<SpotifyContextValue | null>(null);
+const SpotifyContext = createStableContext<SpotifyContextValue | null>("SpotifyContext", null);
 
 export function SpotifyProvider({ children }: { children: ReactNode }) {
   const configured = Boolean(getSpotifyClientId());

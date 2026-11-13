@@ -2,7 +2,8 @@ import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
-import { isMediaSource, usePlayer } from "@/player/player-context";
+import { isMediaSource } from "@/player/media-source";
+import { usePlayer } from "@/player/player-context";
 import { stageAnchors } from "./stage-anchor";
 
 const FLOAT_HEADER = 32;

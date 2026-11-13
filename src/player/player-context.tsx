@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -10,6 +9,7 @@ import {
 } from "react";
 
 import { DEMO_TRENDING } from "@/lib/demo-data";
+import { createStableContext } from "@/lib/stable-context";
 import type { Source, Track } from "@/lib/types";
 import { DemoEngine } from "./engines/demo-engine";
 import { SpotifyEmbedEngine } from "./engines/spotify-embed-engine";
@@ -61,7 +61,7 @@ interface PlayerApi extends PlayerState {
   registerHost: (source: "youtube" | "spotify", el: HTMLElement | null) => void;
 }
 
-const PlayerContext = createContext<PlayerApi | null>(null);
+const PlayerContext = createStableContext<PlayerApi | null>("PlayerContext", null);
 
 const INITIAL: PlayerState = {
   queue: DEMO_TRENDING,
@@ -271,6 +271,3 @@ export function usePlayer(): PlayerApi {
   return ctx;
 }
 
-export function isMediaSource(source: Source | undefined): source is "youtube" | "spotify" {
-  return source === "youtube" || source === "spotify";
-}

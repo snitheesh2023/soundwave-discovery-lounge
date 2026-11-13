@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { useContext, useState, type ReactNode } from "react";
+
+import { createStableContext } from "@/lib/stable-context";
 
 interface UiState {
   nowPlayingOpen: boolean;
@@ -7,7 +9,7 @@ interface UiState {
   toggleRightPanel: () => void;
 }
 
-const UiContext = createContext<UiState | null>(null);
+const UiContext = createStableContext<UiState | null>("UiContext", null);
 
 export function UiProvider({ children }: { children: ReactNode }) {
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
