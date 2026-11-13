@@ -25,9 +25,9 @@ const STATE_KEY = "soundwave.spotify.state";
 
 interface StoredToken {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken?: string | undefined;
   expiresAt: number;
-  scope?: string;
+  scope?: string | undefined;
 }
 
 export class SpotifyApiError extends Error {
@@ -39,12 +39,12 @@ export class SpotifyApiError extends Error {
 }
 
 export function getSpotifyClientId(): string | undefined {
-  const id = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined;
+  const id = import.meta.env["VITE_SPOTIFY_CLIENT_ID"] as string | undefined;
   return id && id.trim() ? id.trim() : undefined;
 }
 
 export function getSpotifyRedirectUri(): string {
-  const configured = import.meta.env.VITE_SPOTIFY_REDIRECT_URI as string | undefined;
+  const configured = import.meta.env["VITE_SPOTIFY_REDIRECT_URI"] as string | undefined;
   if (configured && configured.trim()) return configured.trim();
   if (typeof window === "undefined") return "/callback";
   return `${window.location.origin}/callback`;
@@ -118,9 +118,9 @@ export function clearSpotifySession() {
 }
 
 export async function completeSpotifyLogin(params: {
-  code?: string;
-  state?: string;
-  error?: string;
+  code?: string | undefined;
+  state?: string | undefined;
+  error?: string | undefined;
 }): Promise<void> {
   if (params.error) {
     throw new Error(

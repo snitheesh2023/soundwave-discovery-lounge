@@ -8,10 +8,10 @@ import { useSpotify } from "@/hooks/use-spotify";
 import { completeSpotifyLogin } from "@/lib/spotify";
 
 export const Route = createFileRoute("/callback")({
-  validateSearch: (s: Record<string, unknown>): { code?: string; state?: string; error?: string } => ({
-    code: typeof s.code === "string" ? s.code : undefined,
-    state: typeof s.state === "string" ? s.state : undefined,
-    error: typeof s.error === "string" ? s.error : undefined,
+  validateSearch: (s: Record<string, unknown>): { code?: string | undefined; state?: string | undefined; error?: string | undefined } => ({
+    code: typeof s["code"] === "string" ? s["code"] : undefined,
+    state: typeof s["state"] === "string" ? s["state"] : undefined,
+    error: typeof s["error"] === "string" ? s["error"] : undefined,
   }),
   head: () => ({
     meta: [

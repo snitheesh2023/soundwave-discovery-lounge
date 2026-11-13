@@ -2,9 +2,9 @@ import { generatedArtStyle, hueFromString } from "@/lib/art";
 import { cn } from "@/lib/utils";
 
 interface ArtworkProps {
-  src?: string;
-  hue?: number;
-  seed?: string;
+  src?: string | undefined;
+  hue?: number | undefined;
+  seed?: string | undefined;
   alt: string;
   className?: string;
   rounded?: "sm" | "md" | "lg" | "full";

@@ -10,7 +10,7 @@ import { parseIsoDuration, youTubeWatchUrl } from "./youtube-url";
  */
 
 export const getYouTubeStatus = createServerFn({ method: "GET" }).handler(async () => {
-  return { configured: Boolean(process.env.YOUTUBE_API_KEY) };
+  return { configured: Boolean(process.env["YOUTUBE_API_KEY"]) };
 });
 
 export interface YouTubeSearchResult {
@@ -31,7 +31,7 @@ function decodeEntities(value: string): string {
 export const searchYouTube = createServerFn({ method: "POST" })
   .validator((input: unknown) => z.object({ q: z.string().trim().min(1).max(120) }).parse(input))
   .handler(async ({ data }): Promise<YouTubeSearchResult> => {
-    const key = process.env.YOUTUBE_API_KEY;
+    const key = process.env["YOUTUBE_API_KEY"];
     if (!key) return { configured: false, items: [] };
 
     const searchParams = new URLSearchParams({
@@ -90,7 +90,7 @@ export const searchYouTube = createServerFn({ method: "POST" })
         title: decodeEntities(v.snippet.title),
         artist: decodeEntities(v.snippet.channelTitle),
         durationSec: durations.get(id) ?? 0,
-        artworkUrl: (thumbs.high ?? thumbs.medium ?? thumbs.default)?.url,
+        artworkUrl: (thumbs["high"] ?? thumbs["medium"] ?? thumbs["default"])?.url,
         source: "youtube",
         youtubeId: id,
         externalUrl: youTubeWatchUrl(id),

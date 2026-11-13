@@ -18,6 +18,7 @@ export function StageAnchor({ className }: { className?: string }) {
         if (i >= 0) stageAnchors.splice(i, 1);
       };
     }
+    return undefined;
   }, []);
   return (
     <div

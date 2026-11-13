@@ -20,7 +20,7 @@ interface YTNamespace {
   Player: new (
     el: HTMLElement,
     opts: {
-      videoId?: string;
+      videoId?: string | undefined;
       width?: string | number;
       height?: string | number;
       playerVars?: Record<string, string | number>;

@@ -29,9 +29,9 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/search")({
-  validateSearch: (search: Record<string, unknown>): { q?: string; tab?: Tab } => ({
-    q: typeof search.q === "string" && search.q ? search.q.slice(0, 200) : undefined,
-    tab: search.tab === "spotify" || search.tab === "youtube" ? search.tab : undefined,
+  validateSearch: (search: Record<string, unknown>): { q?: string | undefined; tab?: Tab | undefined } => ({
+    q: typeof search["q"] === "string" && search["q"] ? search["q"].slice(0, 200) : undefined,
+    tab: search["tab"] === "spotify" || search["tab"] === "youtube" ? search["tab"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -221,7 +221,7 @@ function ListSkeleton() {
   );
 }
 
-function SpotifyResults({ query, limit }: { query: string; limit?: number }) {
+function SpotifyResults({ query, limit }: { query: string; limit?: number | undefined }) {
   const { status, connect, connecting } = useSpotify();
   const results = useQuery({
     queryKey: ["spotify", "search", query],
@@ -286,7 +286,7 @@ function SpotifyResults({ query, limit }: { query: string; limit?: number }) {
   );
 }
 
-function YouTubeResults({ query, limit }: { query: string; limit?: number }) {
+function YouTubeResults({ query, limit }: { query: string; limit?: number | undefined }) {
   const status = useYouTubeStatus();
   const configured = status.data?.configured === true;
   const results = useYouTubeSearch(query, configured);

@@ -11,7 +11,7 @@ function place(el: HTMLDivElement, source: "youtube" | "spotify") {
   for (let i = stageAnchors.length - 1; i >= 0; i--) {
     const r = stageAnchors[i]!.getBoundingClientRect();
     if (r.width > 0 && r.height > 0) {
-      el.dataset.mode = "anchored";
+      el.dataset["mode"] = "anchored";
       el.style.top = `${r.top}px`;
       el.style.left = `${r.left}px`;
       el.style.width = `${r.width}px`;
@@ -25,7 +25,7 @@ function place(el: HTMLDivElement, source: "youtube" | "spotify") {
   const height = (source === "youtube" ? (width * 9) / 16 : 152) + FLOAT_HEADER;
   const chrome = document.getElementById("bottom-chrome");
   const bottom = chrome ? chrome.getBoundingClientRect().top : window.innerHeight;
-  el.dataset.mode = "floating";
+  el.dataset["mode"] = "floating";
   el.style.top = `${bottom - gap - height}px`;
   el.style.left = `${vw - gap - width}px`;
   el.style.width = `${width}px`;
@@ -47,7 +47,7 @@ export function MediaStage() {
     const el = ref.current;
     if (!el) return;
     if (!active || !isMediaSource(source)) {
-      el.dataset.mode = "hidden";
+      el.dataset["mode"] = "hidden";
       return;
     }
     let raf = 0;

@@ -13,8 +13,8 @@ interface TrackRowProps {
   track: Track;
   index: number;
   queue: Track[];
-  showBadge?: boolean;
-  showAlbum?: boolean;
+  showBadge?: boolean | undefined;
+  showAlbum?: boolean | undefined;
 }
 
 export function TrackRow({ track, index, queue, showBadge = true, showAlbum = true }: TrackRowProps) {

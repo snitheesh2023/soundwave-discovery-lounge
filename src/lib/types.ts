@@ -5,27 +5,27 @@ export interface Track {
   id: string;
   title: string;
   artist: string;
-  album?: string;
+  album?: string | undefined;
   /** Seconds. 0 means unknown (e.g. live streams). */
   durationSec: number;
-  artworkUrl?: string;
+  artworkUrl?: string | undefined;
   /** Hue used for generated artwork when no artworkUrl exists. */
-  hue?: number;
+  hue?: number | undefined;
   source: Source;
-  spotifyUri?: string;
-  youtubeId?: string;
-  externalUrl?: string;
-  explicit?: boolean;
+  spotifyUri?: string | undefined;
+  youtubeId?: string | undefined;
+  externalUrl?: string | undefined;
+  explicit?: boolean | undefined;
 }
 
 export interface Collection {
   id: string;
   title: string;
   description: string;
-  artworkUrl?: string;
-  hue?: number;
+  artworkUrl?: string | undefined;
+  hue?: number | undefined;
   source: Source;
   trackCount: number;
-  owner?: string;
-  externalUrl?: string;
+  owner?: string | undefined;
+  externalUrl?: string | undefined;
 }
