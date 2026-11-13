@@ -50,6 +50,12 @@ export function getSpotifyRedirectUri(): string {
   const configured = import.meta.env["VITE_SPOTIFY_REDIRECT_URI"] as string | undefined;
   if (configured && configured.trim()) return configured.trim();
   if (typeof window === "undefined") return "/callback";
+
+  // The published app has a fixed Spotify callback registered in the Spotify
+  // dashboard. Preview and local builds continue to use their own origin.
+  if (window.location.hostname === "soundwave-discovery-lounge.lovable.app") {
+    return "https://soundwave-discovery-lounge.lovable.app/callback";
+  }
   return `${window.location.origin}/callback`;
 }
 

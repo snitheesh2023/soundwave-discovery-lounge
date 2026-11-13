@@ -21,8 +21,10 @@ export function TrackRow({ track, index, queue, showBadge = true, showAlbum = tr
   const player = usePlayer();
   const isCurrent = player.current?.id === track.id;
   const playing = isCurrent && player.isPlaying;
+  const awaitingYouTubeMatch = track.id.startsWith("import:");
 
   const onPlay = () => {
+    if (awaitingYouTubeMatch) return;
     if (isCurrent) player.togglePlay();
     else player.playTrack(track, queue);
   };
@@ -81,6 +83,7 @@ export function TrackRow({ track, index, queue, showBadge = true, showAlbum = tr
           size="icon-sm"
           className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
           aria-label={`Add ${track.title} to queue`}
+          disabled={awaitingYouTubeMatch}
           onClick={() => player.addToQueue(track)}
         >
           <ListPlus />

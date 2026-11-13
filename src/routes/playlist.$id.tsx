@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ExternalLink, Play } from "lucide-react";
+import { ExternalLink, Play, Youtube } from "lucide-react";
 
 import { Artwork } from "@/components/music/Artwork";
 import { SampleNotice } from "@/components/music/SampleNotice";
@@ -10,8 +11,12 @@ import { TrackList } from "@/components/music/TrackRow";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSpotify } from "@/hooks/use-spotify";
+import { useYouTubeStatus } from "@/hooks/use-youtube";
 import { findDemoCollection, tracksFor } from "@/lib/demo-data";
 import { spotifyApi } from "@/lib/spotify";
+import { getImportedPlaylists, saveImportedPlaylists, type ImportedPlaylist } from "@/lib/imported-playlists";
+import { searchYouTube } from "@/lib/youtube.functions";
+import { youTubeWatchUrl } from "@/lib/youtube-url";
 import type { Collection, Track } from "@/lib/types";
 import { usePlayer } from "@/player/player-context";
 
@@ -58,9 +63,48 @@ function PlaylistPage() {
   const { id } = Route.useParams();
   const demo = findDemoCollection(id);
   const { status } = useSpotify();
-  const enabled = !demo && status === "connected";
+  const [imported, setImported] = useState<ImportedPlaylist | undefined>(() => getImportedPlaylists().find((p) => p.id === id));
+  const [matching, setMatching] = useState(false);
+  const [matchError, setMatchError] = useState<string | null>(null);
+  const youtubeStatus = useYouTubeStatus();
+  useEffect(() => { setImported(getImportedPlaylists().find((p) => p.id === id)); }, [id]);
+  const enabled = !demo && !imported && status === "connected";
   const meta = useQuery({ queryKey: ["spotify", "playlist", id], queryFn: () => spotifyApi.playlist(id), enabled, retry: false });
   const tracks = useQuery({ queryKey: ["spotify", "playlist", id, "tracks"], queryFn: () => spotifyApi.playlistTracks(id), enabled, retry: false });
+
+  if (imported) {
+    const matched = imported.tracks.filter((t) => t.source === "youtube" && t.youtubeId);
+    const findMatches = async () => {
+      setMatching(true); setMatchError(null);
+      try {
+        const out: Track[] = [];
+        for (let start = 0; start < imported.tracks.length; start += 4) {
+          const batch = imported.tracks.slice(start, start + 4);
+          const found = await Promise.all(batch.map(async (track) => {
+            if (track.source === "youtube" && track.youtubeId) return track;
+            const result = await searchYouTube({ data: { q: `${track.title} ${track.artist} official audio` } });
+            const video = result.items[0];
+            if (!video?.youtubeId) return null;
+            return { ...video, title: track.title, artist: track.artist, album: track.album, source: "youtube" as const, externalUrl: youTubeWatchUrl(video.youtubeId) };
+          }));
+          out.push(...found.filter((t): t is Track => Boolean(t)));
+        }
+        const updated = { ...imported, tracks: out, trackCount: out.length };
+        saveImportedPlaylists(getImportedPlaylists().map((p) => p.id === id ? updated : p)); setImported(updated);
+        if (!out.length) setMatchError("No YouTube matches found. Check YouTube search setup and try again.");
+      } catch (e) { setMatchError(e instanceof Error ? e.message : "YouTube matching failed."); }
+      finally { setMatching(false); }
+    };
+    return <div className="flex flex-col gap-6 pt-2"><Header collection={imported} tracks={imported.tracks} />
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-surface-2/40 p-4">
+        <div className="flex-1 text-sm text-muted-foreground">{matched.length ? `${matched.length} tracks matched to YouTube.` : "Find playable YouTube videos for this Spotify playlist."}{matchError && <p role="alert" className="mt-1 text-destructive">{matchError}</p>}</div>
+        <Button onClick={findMatches} disabled={matching || youtubeStatus.data?.configured !== true}><Youtube />{matching ? "Finding matches…" : matched.length ? "Refresh YouTube matches" : "Find YouTube matches"}</Button>
+        {youtubeStatus.data?.configured === false && <p className="w-full text-xs text-muted-foreground">YouTube search needs an API key. Add it in Connections.</p>}
+      </div>
+      {imported.tracks.length ? <TrackList tracks={imported.tracks} showBadge /> : <EmptyState title="No tracks found in this import" />}
+      <p className="text-xs text-muted-foreground">Video matches may differ from the original recording. Playback uses YouTube’s official player and may include ads.</p>
+    </div>;
+  }
 
   if (demo) {
     const list = tracksFor(demo);
