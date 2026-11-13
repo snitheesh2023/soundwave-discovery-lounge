@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CallbackRouteImport } from './routes/callback'
+import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PlaylistIdRouteImport } from './routes/playlist.$id'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const CallbackRoute = CallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectionsRoute = ConnectionsRouteImport.update({
+  id: '/connections',
+  path: '/connections',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryRoute = LibraryRouteImport.update({
@@ -44,6 +50,7 @@ const PlaylistIdRoute = PlaylistIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/callback': typeof CallbackRoute
+  '/connections': typeof ConnectionsRoute
   '/library': typeof LibraryRoute
   '/search': typeof SearchRoute
   '/playlist/$id': typeof PlaylistIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/callback': typeof CallbackRoute
+  '/connections': typeof ConnectionsRoute
   '/library': typeof LibraryRoute
   '/search': typeof SearchRoute
   '/playlist/$id': typeof PlaylistIdRoute
@@ -59,21 +67,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/callback': typeof CallbackRoute
+  '/connections': typeof ConnectionsRoute
   '/library': typeof LibraryRoute
   '/search': typeof SearchRoute
   '/playlist/$id': typeof PlaylistIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/callback' | '/library' | '/search' | '/playlist/$id'
+  fullPaths:
+    | '/'
+    | '/callback'
+    | '/connections'
+    | '/library'
+    | '/search'
+    | '/playlist/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/callback' | '/library' | '/search' | '/playlist/$id'
-  id: '__root__' | '/' | '/callback' | '/library' | '/search' | '/playlist/$id'
+  to:
+    | '/'
+    | '/callback'
+    | '/connections'
+    | '/library'
+    | '/search'
+    | '/playlist/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/callback'
+    | '/connections'
+    | '/library'
+    | '/search'
+    | '/playlist/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CallbackRoute: typeof CallbackRoute
+  ConnectionsRoute: typeof ConnectionsRoute
   LibraryRoute: typeof LibraryRoute
   SearchRoute: typeof SearchRoute
   PlaylistIdRoute: typeof PlaylistIdRoute
@@ -93,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/callback'
       fullPath: '/callback'
       preLoaderRoute: typeof CallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connections': {
+      id: '/connections'
+      path: '/connections'
+      fullPath: '/connections'
+      preLoaderRoute: typeof ConnectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library': {
@@ -122,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CallbackRoute: CallbackRoute,
+  ConnectionsRoute: ConnectionsRoute,
   LibraryRoute: LibraryRoute,
   SearchRoute: SearchRoute,
   PlaylistIdRoute: PlaylistIdRoute,

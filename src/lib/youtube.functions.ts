@@ -29,7 +29,7 @@ function decodeEntities(value: string): string {
 }
 
 export const searchYouTube = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ q: z.string().trim().min(1).max(120) }).parse(input))
+  .validator((input: unknown) => z.object({ q: z.string().trim().min(1).max(120) }).parse(input))
   .handler(async ({ data }): Promise<YouTubeSearchResult> => {
     const key = process.env.YOUTUBE_API_KEY;
     if (!key) return { configured: false, items: [] };

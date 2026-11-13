@@ -28,3 +28,10 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Spotify uses Authorization Code + PKCE entirely in the browser (`src/lib/spotify.ts`); only the public Client ID is configured, never a client secret.
+- YouTube Data API calls run in server functions (`src/lib/youtube.functions.ts`) so the API key stays server-side; playback only through the official IFrame player.
+- Playback goes through engine adapters in `src/player/engines/*` behind one player context; pure queue rules live in `src/player/queue-logic.ts` and are unit-tested.
+- Made-up content must carry the "Sample" source badge so it is never mistaken for real provider data.
